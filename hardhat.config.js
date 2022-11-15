@@ -10,10 +10,17 @@ module.exports = {
             forking: {
                 url: process.env.BNB_RPC_URL,
             },
+            // forking: {
+            //     url: process.env.ETH_RPC_URL,
+            // },
+        },
+        goerli: {
+            url: process.env.GOE_RPC_URL,
+            accounts: [process.env.GOE_PRIVATE_KEY],
         },
         bsc: {
             url: process.env.BNB_RPC_URL,
-            accounts: [process.env.PRIVATE_KEY],
+            accounts: [process.env.PRIVATE_KEY_TOKEN_DEPLOYER],
         },
     },
     bscscan: {

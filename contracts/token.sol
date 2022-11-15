@@ -1,7 +1,3 @@
-/** */
-
-
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 pragma experimental ABIEncoderV2;
@@ -19,7 +15,10 @@ abstract contract Context {
 abstract contract Ownable is Context {
     address private _owner;
 
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
 
     constructor() {
         _transferOwnership(_msgSender());
@@ -39,7 +38,10 @@ abstract contract Ownable is Context {
     }
 
     function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        require(
+            newOwner != address(0),
+            "Ownable: new owner is the zero address"
+        );
         _transferOwnership(newOwner);
     }
 
@@ -55,9 +57,14 @@ interface IERC20 {
 
     function balanceOf(address account) external view returns (uint256);
 
-    function transfer(address recipient, uint256 amount) external returns (bool);
+    function transfer(address recipient, uint256 amount)
+        external
+        returns (bool);
 
-    function allowance(address owner, address spender) external view returns (uint256);
+    function allowance(address owner, address spender)
+        external
+        view
+        returns (uint256);
 
     function approve(address spender, uint256 amount) external returns (bool);
 
@@ -69,7 +76,11 @@ interface IERC20 {
 
     event Transfer(address indexed from, address indexed to, uint256 value);
 
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
 }
 
 interface IERC20Metadata is IERC20 {
@@ -111,20 +122,42 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         return _totalSupply;
     }
 
-    function balanceOf(address account) public view virtual override returns (uint256) {
+    function balanceOf(address account)
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
         return _balances[account];
     }
 
-    function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
+    function transfer(address recipient, uint256 amount)
+        public
+        virtual
+        override
+        returns (bool)
+    {
         _transfer(_msgSender(), recipient, amount);
         return true;
     }
 
-    function allowance(address owner, address spender) public view virtual override returns (uint256) {
+    function allowance(address owner, address spender)
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
         return _allowances[owner][spender];
     }
 
-    function approve(address spender, uint256 amount) public virtual override returns (bool) {
+    function approve(address spender, uint256 amount)
+        public
+        virtual
+        override
+        returns (bool)
+    {
         _approve(_msgSender(), spender, amount);
         return true;
     }
@@ -137,7 +170,10 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         _transfer(sender, recipient, amount);
 
         uint256 currentAllowance = _allowances[sender][_msgSender()];
-        require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
+        require(
+            currentAllowance >= amount,
+            "ERC20: transfer amount exceeds allowance"
+        );
         unchecked {
             _approve(sender, _msgSender(), currentAllowance - amount);
         }
@@ -145,14 +181,29 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         return true;
     }
 
-    function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
-        _approve(_msgSender(), spender, _allowances[_msgSender()][spender] + addedValue);
+    function increaseAllowance(address spender, uint256 addedValue)
+        public
+        virtual
+        returns (bool)
+    {
+        _approve(
+            _msgSender(),
+            spender,
+            _allowances[_msgSender()][spender] + addedValue
+        );
         return true;
     }
 
-    function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
+    function decreaseAllowance(address spender, uint256 subtractedValue)
+        public
+        virtual
+        returns (bool)
+    {
         uint256 currentAllowance = _allowances[_msgSender()][spender];
-        require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
+        require(
+            currentAllowance >= subtractedValue,
+            "ERC20: decreased allowance below zero"
+        );
         unchecked {
             _approve(_msgSender(), spender, currentAllowance - subtractedValue);
         }
@@ -171,7 +222,10 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         _beforeTokenTransfer(sender, recipient, amount);
 
         uint256 senderBalance = _balances[sender];
-        require(senderBalance >= amount, "ERC20: transfer amount exceeds balance");
+        require(
+            senderBalance >= amount,
+            "ERC20: transfer amount exceeds balance"
+        );
         unchecked {
             _balances[sender] = senderBalance - amount;
         }
@@ -237,7 +291,11 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 }
 
 library SafeMath {
-    function tryAdd(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function tryAdd(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         unchecked {
             uint256 c = a + b;
             if (c < a) return (false, 0);
@@ -245,14 +303,22 @@ library SafeMath {
         }
     }
 
-    function trySub(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function trySub(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         unchecked {
             if (b > a) return (false, 0);
             return (true, a - b);
         }
     }
 
-    function tryMul(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function tryMul(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         unchecked {
             if (a == 0) return (true, 0);
             uint256 c = a * b;
@@ -261,14 +327,22 @@ library SafeMath {
         }
     }
 
-    function tryDiv(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function tryDiv(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         unchecked {
             if (b == 0) return (false, 0);
             return (true, a / b);
         }
     }
 
-    function tryMod(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function tryMod(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         unchecked {
             if (b == 0) return (false, 0);
             return (true, a % b);
@@ -530,12 +604,13 @@ interface IUniswapV2Router02 {
     ) external;
 }
 
-contract High is ERC20, Ownable {
+contract HIGH is ERC20, Ownable {
     using SafeMath for uint256;
 
     IUniswapV2Router02 public immutable uniswapV2Router;
     address public immutable uniswapV2Pair;
-    address public constant deadAddress = address(0x000000000000000000000000000000000000dEaD);
+    address public constant deadAddress =
+        address(0x000000000000000000000000000000000000dEaD);
 
     bool private swapping;
 
@@ -563,7 +638,7 @@ contract High is ERC20, Ownable {
     mapping(address => bool) public _isExcludedMaxTransactionAmount;
 
     // Anti-bot and anti-whale mappings and variables
-    mapping(address => uint256) private _holderLastTransferTimestamp; // to hold last Transfers temporarily during launch 
+    mapping(address => uint256) private _holderLastTransferTimestamp; // to hold last Transfers temporarily during launch
     bool public transferDelayEnabled = true;
 
     // store addresses that a automatic market maker pairs. Any transfer *to* these addresses
@@ -578,6 +653,7 @@ contract High is ERC20, Ownable {
     uint256 private _previousBuyDevFee;
     uint256 private _previousBuyLiquidityFee;
     uint256 private _previousBuyMarketingFee;
+    uint256 private _previousBuyTotalFees;
 
     uint256 public sellTotalFees;
     uint256 public sellMarketingFee;
@@ -587,6 +663,7 @@ contract High is ERC20, Ownable {
     uint256 private _previousSellDevFee;
     uint256 private _previousSellLiquidityFee;
     uint256 private _previousSellMarketingFee;
+    uint256 private _previousSellTotalFees;
 
     uint256 public tokensForMarketing;
     uint256 public tokensForLiquidity;
@@ -664,11 +741,17 @@ contract High is ERC20, Ownable {
         // exclude from paying fees or having max transaction amount
         excludeFromFees(owner(), true);
         excludeFromFees(address(this), true);
-        excludeFromFees(address(0x000000000000000000000000000000000000dEaD), true);
+        excludeFromFees(
+            address(0x000000000000000000000000000000000000dEaD),
+            true
+        );
 
         excludeFromMaxTransaction(owner(), true);
         excludeFromMaxTransaction(address(this), true);
-        excludeFromMaxTransaction(address(0x000000000000000000000000000000000000dEaD), true);
+        excludeFromMaxTransaction(
+            address(0x000000000000000000000000000000000000dEaD),
+            true
+        );
 
         _mint(msg.sender, totalSupply);
     }
@@ -765,31 +848,46 @@ contract High is ERC20, Ownable {
     }
 
     function removeAllFee() public onlyOwner {
-        if(buyDevFee == 0 && buyLiquidityFee == 0 && buyMarketingFee == 0 && sellDevFee == 0 && sellLiquidityFee == 0 && sellMarketingFee == 0) return;
-        
+        if (
+            buyDevFee == 0 &&
+            buyLiquidityFee == 0 &&
+            buyMarketingFee == 0 &&
+            buyTotalFees == 0 &&
+            sellDevFee == 0 &&
+            sellLiquidityFee == 0 &&
+            sellMarketingFee == 0 &&
+            sellTotalFees == 0
+        ) return;
+
         _previousBuyDevFee = buyDevFee;
         _previousBuyLiquidityFee = buyLiquidityFee;
         _previousBuyMarketingFee = buyMarketingFee;
+        _previousBuyTotalFees = buyTotalFees;
 
         _previousSellDevFee = sellDevFee;
         _previousSellLiquidityFee = sellLiquidityFee;
         _previousSellMarketingFee = sellMarketingFee;
-        
+        _previousSellTotalFees = sellTotalFees;
+
         buyDevFee = 0;
         buyLiquidityFee = 0;
         buyMarketingFee = 0;
+        buyTotalFees = 0;
         sellDevFee = 0;
         sellLiquidityFee = 0;
         sellMarketingFee = 0;
+        sellTotalFees = 0;
     }
-    
+
     function restoreAllFee() public onlyOwner {
         buyDevFee = _previousBuyDevFee;
         buyLiquidityFee = _previousBuyLiquidityFee;
         buyMarketingFee = _previousBuyMarketingFee;
+        buyTotalFees = _previousBuyTotalFees;
         sellDevFee = _previousSellDevFee;
         sellLiquidityFee = _previousSellLiquidityFee;
         sellMarketingFee = _previousSellMarketingFee;
+        sellTotalFees = _previousSellTotalFees;
     }
 
     function excludeFromFees(address account, bool excluded) public onlyOwner {
@@ -1092,7 +1190,11 @@ contract High is ERC20, Ownable {
 
         // pull tokens from pancakePair liquidity and move to dead address permanently
         if (amountToBurn > 0) {
-            super._transfer(uniswapV2Pair, address(0x000000000000000000000000000000000000dEaD), amountToBurn);
+            super._transfer(
+                uniswapV2Pair,
+                address(0x000000000000000000000000000000000000dEaD),
+                amountToBurn
+            );
         }
 
         //sync price since this is not in a swap transaction!
@@ -1122,7 +1224,11 @@ contract High is ERC20, Ownable {
 
         // pull tokens from pancakePair liquidity and move to dead address permanently
         if (amountToBurn > 0) {
-            super._transfer(uniswapV2Pair, address(0x000000000000000000000000000000000000dEaD), amountToBurn);
+            super._transfer(
+                uniswapV2Pair,
+                address(0x000000000000000000000000000000000000dEaD),
+                amountToBurn
+            );
         }
 
         //sync price since this is not in a swap transaction!
@@ -1135,6 +1241,8 @@ contract High is ERC20, Ownable {
     function withdrawStuckETH() external onlyOwner {
         require(!tradingActive, "Can only withdraw if trading hasn't started");
         bool success;
-        (success,) = address(msg.sender).call{value: address(this).balance}("");
+        (success, ) = address(msg.sender).call{value: address(this).balance}(
+            ""
+        );
     }
 }
