@@ -23,8 +23,10 @@ module.exports = {
             accounts: [process.env.PRIVATE_KEY_TOKEN_DEPLOYER],
         },
     },
-    bscscan: {
-        apiKey: process.env.BSCSCAN_API_KEY,
+    etherscan: {
+        apiKey: {
+            bsc: process.env.BSCSCAN_API_KEY,
+        },
         customChains: [
             {
                 network: "bsc",
