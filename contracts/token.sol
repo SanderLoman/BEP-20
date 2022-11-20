@@ -609,8 +609,7 @@ contract HIGH is ERC20, Ownable {
 
     IUniswapV2Router02 public immutable uniswapV2Router;
     address public immutable uniswapV2Pair;
-    address public constant deadAddress =
-        address(0x000000000000000000000000000000000000dEaD);
+    address public constant deadAddress = address(0x000000000000000000000000000000000000dEaD);
 
     bool private swapping;
 
@@ -633,11 +632,15 @@ contract HIGH is ERC20, Ownable {
     bool public tradingActive = false;
     bool public swapEnabled = false;
 
-    // exlcude from fees and max transaction amount
-    mapping(address => bool) private _isExcludedFromFees;
+    // exclude from fees, max transactions and blacklisting
+    mapping(address => bool) public _isExcludedFromFees;
     mapping(address => bool) public _isExcludedMaxTransactionAmount;
+    mapping(address => bool) public _isExcludedFromBlacklist;
 
     // Anti-bot and anti-whale mappings and variables
+    mapping(address => bool) private _isBot;
+    uint256 private immutable blocksToBlacklist = 20; // BSC block time is ~3 seconds, so 20 blocks is ~1 mintue
+
     mapping(address => uint256) private _holderLastTransferTimestamp; // to hold last Transfers temporarily during launch
     bool public transferDelayEnabled = true;
 
@@ -693,6 +696,8 @@ contract HIGH is ERC20, Ownable {
         uint256 ethReceived,
         uint256 tokensIntoLiquidity
     );
+
+    event botBlacklisted(address indexed account, bool isBlacklisted);
 
     event AutoNukeLP();
 
@@ -930,8 +935,6 @@ contract HIGH is ERC20, Ownable {
         return _isExcludedFromFees[account];
     }
 
-    event BoughtEarly(address indexed sniper);
-
     function _transfer(
         address from,
         address to,
@@ -970,7 +973,7 @@ contract HIGH is ERC20, Ownable {
                         require(
                             _holderLastTransferTimestamp[tx.origin] <
                                 block.number,
-                            "_transfer:: Transfer Delay enabled.  Only one purchase per block allowed."
+                            "_transfer: Transfer Delay enabled. Only one purchase per block allowed."
                         );
                         _holderLastTransferTimestamp[tx.origin] = block.number;
                     }
@@ -1245,4 +1248,10 @@ contract HIGH is ERC20, Ownable {
             ""
         );
     }
+
+    function autoBlacklist() external onlyOwner {
+        
+    }
 }
+
+// Note to self: code it so that when we enableTrading we get the current block.number and we and we make sure that the first 20 blocks are going to be blacklisted from selling and an event is emitted.
