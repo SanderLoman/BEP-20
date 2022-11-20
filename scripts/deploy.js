@@ -2,7 +2,6 @@ const hre = require("hardhat")
 require("@nomiclabs/hardhat-ethers")
 
 const main = async () => {
-    //let initialSupply = ethers.utils.parseEther("100000000")
     const [deployer] = await hre.ethers.getSigners()
     console.log("Deploying contracts with the account:", deployer.address)
 
