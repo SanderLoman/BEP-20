@@ -28,8 +28,12 @@ abstract contract Ownable is Context {
         return _owner;
     }
 
-    modifier onlyOwner() {
+    function _onlyOwner() private view {
         require(owner() == _msgSender(), "Ownable: caller is not the owner");
+    }
+
+    modifier onlyOwner() {
+        _onlyOwner();
         _;
     }
 
@@ -1258,3 +1262,11 @@ contract HIGH is ERC20, Ownable {
 }
 
 // Note to self: code it so that when we enableTrading we get the current block.number and we and we make sure that the first 20 blocks are going to be blacklisted from selling and an event is emitted.
+
+/**
+ * !!! WARNING !!!
+ * 
+ * @dev changed the onlyOwner modifier, check if the modifier still works when deploying a new contract (test onlyOwner functions).
+ * 
+ * !!! WARNING !!!
+ */
