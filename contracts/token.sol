@@ -645,7 +645,7 @@ contract HIGH is ERC20, Ownable {
     mapping (address => bool) private _isBlackList;
     uint256 public currentBlock;
     uint256 private blocksToBlacklist = 20; // BSC block time is ~3 seconds, so 20 blocks is ~1 mintue
-    uint256 private immutable totalBlocksToBlacklist = currentBlock.add(blocksToBlacklist);
+    uint256 private totalBlocksToBlacklist = currentBlock.add(blocksToBlacklist);
 
     mapping(address => uint256) private _holderLastTransferTimestamp; // to hold last Transfers temporarily during launch
     bool public transferDelayEnabled = true;
