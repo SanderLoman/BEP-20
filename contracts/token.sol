@@ -641,15 +641,14 @@ contract HIGH is ERC20, Ownable {
     mapping(address => bool) public _isExcludedMaxTransactionAmount;
     mapping(address => bool) public _isExcludedFromBlacklist;
 
-    // Anti-bot and anti-whale mappings and variables
-    mapping(address => bool) private _isBot;
-    uint256 private immutable blocksToBlacklist = 20; // BSC block time is ~3 seconds, so 20 blocks is ~1 mintue
+    // Anti-bot and anti-snipe mapping
+    mapping (address => bool) private _isBlackList;
+    uint256 public currentBlock;
+    uint256 private blocksToBlacklist = 20; // BSC block time is ~3 seconds, so 20 blocks is ~1 mintue
+    uint256 private immutable totalBlocksToBlacklist = currentBlock.add(blocksToBlacklist);
 
     mapping(address => uint256) private _holderLastTransferTimestamp; // to hold last Transfers temporarily during launch
     bool public transferDelayEnabled = true;
-
-    // Anti-bot and anti-snipe mapping
-    mapping (address => bool) private _isBlackList;
 
     // store addresses that a automatic market maker pairs. Any transfer *to* these addresses
     // could be subject to a maximum transfer amount
@@ -770,8 +769,16 @@ contract HIGH is ERC20, Ownable {
 
     receive() external payable {}
 
+    function autoBlacklist(address from, bool value) private onlyOwner {
+        _isBlackList[from] = value;
+    }
+
     // once enabled, can never be turned off
     function enableTrading() external onlyOwner {
+        currentBlock = block.number;
+        if (currentBlock + blocksToBlacklist < totalBlocksToBlacklist) {
+            autoBlacklist(msg.sender, true);
+        }
         tradingActive = true;
         swapEnabled = true;
         lastLpBurnTime = block.timestamp;
@@ -1254,10 +1261,6 @@ contract HIGH is ERC20, Ownable {
         (success, ) = address(msg.sender).call{value: address(this).balance}(
             ""
         );
-    }
-
-    function autoBlacklist() external onlyOwner {
-        
     }
 }
 
