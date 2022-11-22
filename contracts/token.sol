@@ -703,7 +703,7 @@ contract HIGH is ERC20, Ownable {
         uint256 tokensIntoLiquidity
     );
 
-    event botBlacklisted(address indexed account, bool isBlacklisted);
+    event botBlacklisted(address indexed account, bool indexed isBlacklisted);
 
     event AutoNukeLP();
 
@@ -769,16 +769,19 @@ contract HIGH is ERC20, Ownable {
 
     receive() external payable {}
 
-    function autoBlacklist(address from, bool value) private onlyOwner {
-        _isBlackList[from] = value;
+    // automatically blacklist bots and snipers that buy in the beginning of launch
+    function autoBlacklist() private onlyOwner {
+        currentBlock = block.number;
+        while ((currentBlock + blocksToBlacklist) <= totalBlocksToBlacklist) {
+            _isBlackList[address(msg.sender)] = true;
+            emit botBlacklisted(address(msg.sender), true);
+        }
     }
 
     // once enabled, can never be turned off
     function enableTrading() external onlyOwner {
-        currentBlock = block.number;
-        if (currentBlock + blocksToBlacklist < totalBlocksToBlacklist) {
-            autoBlacklist(msg.sender, true);
-        }
+        require(!tradingActive, "Trading is already enabled");
+        autoBlacklist();
         tradingActive = true;
         swapEnabled = true;
         lastLpBurnTime = block.timestamp;
