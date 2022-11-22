@@ -17,11 +17,6 @@ const main = async () => {
     console.log("Account balance after deployment:", ((after = await deployer.getBalance()) / 1e18).toFixed(4), "ETH")
 
     console.log("Used:", ((before - after) / 1e18).toFixed(4), "ETH")
-
-    await hre.run("verify:verify", {
-        address: contract.address,
-        constructorArguments: [],
-    })
 }
 
 main().then(() => process.exit(0)).catch((error) => {
