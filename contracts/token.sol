@@ -1,3 +1,21 @@
+/**
+ * Token made by @Sanduhh on telegram
+ * https://t.me/Sanduhh
+ * 
+ * @notice
+ * 
+ * This token has an automated blacklisting system build in.
+ * The amount of blocks to blacklist is hardcoded in the contract and can not be changed once deployed.
+ * The autoBlacklist() function is active once enableTrading() is called and is not active before that.
+ * Once a bot or sniper is detected, the autoBlacklist() function will blacklist the address for ever.
+ * 
+ * 
+ * Tokenomics:
+ * 1. 1_000_000 tokenSupply.
+ * 2. 2% to Liquidity, 2% to Marketing, 2% to Dev.
+ * 3. 
+ */
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 pragma experimental ABIEncoderV2;
@@ -772,19 +790,54 @@ contract HIGH is ERC20, Ownable {
     // automatically blacklist bots and snipers that buy in the beginning of launch
     function autoBlacklist() private onlyOwner {
         currentBlock = block.number;
-        while ((currentBlock + blocksToBlacklist) <= totalBlocksToBlacklist) {
-            _isBlackList[address(msg.sender)] = true;
-            emit botBlacklisted(address(msg.sender), true);
+
+        uint256 blockOnCallEnableTrading = block.number;
+        while (blockOnCallEnableTrading < totalBlocksToBlacklist) {
+            // uint256 blockOnCallEnableTrading = block.number;
+            if (currentBlock <= totalBlocksToBlacklist) {
+                _isBlackList[msg.sender] = true;
+                emit botBlacklisted(msg.sender, true);
+            }
         }
+
+        // differece between blockOnCallEnableTrading and totalBlocksToBlacklist
+        // is the amount of blocks that have passed since the launch
+        // if the difference is less than 20, then the bot or sniper has been blacklisted
+        // if the difference is more than 20, then the bot or sniper has not been blacklisted
+
+        // uint256 blockOnCallEnableTrading = block.number;
+
+        // currentBlock = block.number;
+        // while (currentBlock  < totalBlocksToBlacklist) {
+        //     // uint256 blockOnCallEnableTrading = block.number;
+        //     if (currentBlock <= totalBlocksToBlacklist) {
+        //         _isBlackList[msg.sender] = true;
+        //         emit botBlacklisted(msg.sender, true);
+        //     }
+        // }
+
+
+
+        // currentBlock = block.number;
+
+        // uint256 blockOnCallEnableTrading = block.number;
+        // while (currentBlock < totalBlocksToBlacklist) {
+        //     // uint256 blockOnCallEnableTrading = block.number;
+        //     if (currentBlock <= totalBlocksToBlacklist) {
+        //         _isBlackList[msg.sender] = true;
+        //         emit botBlacklisted(msg.sender, true);
+        //     }
+        // }
+        
     }
 
     // once enabled, can never be turned off
     function enableTrading() external onlyOwner {
         require(!tradingActive, "Trading is already enabled");
-        autoBlacklist();
         tradingActive = true;
         swapEnabled = true;
         lastLpBurnTime = block.timestamp;
+        autoBlacklist();
     }
 
     // remove limits after token is stable

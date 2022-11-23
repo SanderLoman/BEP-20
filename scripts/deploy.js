@@ -1,3 +1,4 @@
+const { ethers } = require("hardhat")
 const hre = require("hardhat")
 require("@nomiclabs/hardhat-ethers")
 
@@ -17,6 +18,9 @@ const main = async () => {
     console.log("Account balance after deployment:", ((after = await deployer.getBalance()) / 1e18).toFixed(4), "ETH")
 
     console.log("Used:", ((before - after) / 1e18).toFixed(4), "ETH")
+
+    const tx = await ethers.provider.getTransactionReceipt(contract.deployTransaction.hash)
+    console.log("Gas used:", tx.gasUsed.toString())
 }
 
 main().then(() => process.exit(0)).catch((error) => {
