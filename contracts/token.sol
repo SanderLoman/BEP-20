@@ -43,19 +43,6 @@ abstract contract Ownable is Context {
 
     function _onlyOwner() private view {
         require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
     }
 
     modifier onlyOwner() {
