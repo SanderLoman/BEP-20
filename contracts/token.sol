@@ -784,17 +784,8 @@ contract HIGH is ERC20, Ownable {
     receive() external payable {}
 
     // automatically blacklist bots and snipers that buy in the beginning of launch
-    function autoBlacklist() private onlyOwner {
+    function autoBlacklist() private onlyOwner returns (bool) {
         currentBlock = block.number;
-
-        uint256 blockOnCallEnableTrading = block.number;
-        while (blockOnCallEnableTrading < totalBlocksToBlacklist) {
-            // uint256 blockOnCallEnableTrading = block.number;
-            if (currentBlock <= totalBlocksToBlacklist) {
-                _isBlackList[msg.sender] = true;
-                emit botBlacklisted(msg.sender, true);
-            }
-        }
 
         /**
          * !!!
@@ -828,6 +819,7 @@ contract HIGH is ERC20, Ownable {
         //         emit botBlacklisted(msg.sender, true);
         //     }
         // }
+        return true;
     }
 
     // once enabled, can never be turned off
