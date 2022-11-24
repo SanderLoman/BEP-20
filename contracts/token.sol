@@ -1,19 +1,14 @@
 /**
- * Token made by @Sanduhh on telegram
- * https://t.me/Sanduhh
- * 
- * @notice
- * 
- * This token has an automated blacklisting system build in.
+ * @notice This token has an automated blacklisting system build in.
  * The amount of blocks to blacklist is hardcoded in the contract and can not be changed once deployed.
  * The autoBlacklist() function is active once enableTrading() is called and is not active before that.
  * Once a bot or sniper is detected, the autoBlacklist() function will blacklist the address for ever.
- * 
- * 
+ *
+ *
  * Tokenomics:
  * 1. 1_000_000 tokenSupply.
  * 2. 2% to Liquidity, 2% to Marketing, 2% to Dev.
- * 3. 
+ * 3.
  */
 
 // SPDX-License-Identifier: MIT
@@ -47,6 +42,19 @@ abstract contract Ownable is Context {
     }
 
     function _onlyOwner() private view {
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
         require(owner() == _msgSender(), "Ownable: caller is not the owner");
     }
 
@@ -631,7 +639,8 @@ contract HIGH is ERC20, Ownable {
 
     IUniswapV2Router02 public immutable uniswapV2Router;
     address public immutable uniswapV2Pair;
-    address public constant deadAddress = address(0x000000000000000000000000000000000000dEaD);
+    address public constant deadAddress =
+        address(0x000000000000000000000000000000000000dEaD);
 
     bool private swapping;
 
@@ -660,7 +669,7 @@ contract HIGH is ERC20, Ownable {
     mapping(address => bool) public _isExcludedFromBlacklist;
 
     // Anti-bot and anti-snipe mapping
-    mapping (address => bool) private _isBlackList;
+    mapping(address => bool) private _isBlackList;
     uint256 public currentBlock;
     uint256 private blocksToBlacklist = 20; // BSC block time is ~3 seconds, so 20 blocks is ~1 mintue
     uint256 private totalBlocksToBlacklist = currentBlock.add(blocksToBlacklist);
@@ -800,10 +809,16 @@ contract HIGH is ERC20, Ownable {
             }
         }
 
-        // differece between blockOnCallEnableTrading and totalBlocksToBlacklist
-        // is the amount of blocks that have passed since the launch
-        // if the difference is less than 20, then the bot or sniper has been blacklisted
-        // if the difference is more than 20, then the bot or sniper has not been blacklisted
+        /**
+         * !!!
+         * 
+         * differece between blockOnCallEnableTrading and totalBlocksToBlacklist
+         * is the amount of blocks that have passed since the launch
+         * if the difference is less than 20, then the bot or sniper has been blacklisted
+         * if the difference is more than 20, then the bot or sniper has not been blacklisted
+         * 
+         * !!!
+         */
 
         // uint256 blockOnCallEnableTrading = block.number;
 
@@ -816,8 +831,6 @@ contract HIGH is ERC20, Ownable {
         //     }
         // }
 
-
-
         // currentBlock = block.number;
 
         // uint256 blockOnCallEnableTrading = block.number;
@@ -828,7 +841,6 @@ contract HIGH is ERC20, Ownable {
         //         emit botBlacklisted(msg.sender, true);
         //     }
         // }
-        
     }
 
     // once enabled, can never be turned off
@@ -1324,8 +1336,8 @@ contract HIGH is ERC20, Ownable {
 
 /**
  * !!! WARNING !!!
- * 
+ *
  * @dev changed the onlyOwner modifier, check if the modifier still works when deploying a new contract (test onlyOwner functions).
- * 
+ *
  * !!! WARNING !!!
  */
