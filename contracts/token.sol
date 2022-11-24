@@ -653,13 +653,13 @@ contract HIGH is ERC20, Ownable {
     // exclude from fees, max transactions and blacklisting
     mapping(address => bool) public _isExcludedFromFees;
     mapping(address => bool) public _isExcludedMaxTransactionAmount;
-    mapping(address => bool) public _isExcludedFromBlacklist;
 
     // Anti-bot and anti-snipe mapping
     mapping(address => bool) private _isBlackList;
-    uint256 public currentBlock;
+    uint256 private currentBlockOnEnableTrading;
     uint256 private blocksToBlacklist = 20; // BSC block time is ~3 seconds, so 20 blocks is ~1 mintue
-    uint256 private totalBlocksToBlacklist = currentBlock.add(blocksToBlacklist);
+    uint256 private stopAtBlocksToBlacklist = currentBlock.add(blocksToBlacklist);
+    uint256 private currentBlockOnTransfer; // gets the current block number on transfer
 
     mapping(address => uint256) private _holderLastTransferTimestamp; // to hold last Transfers temporarily during launch
     bool public transferDelayEnabled = true;
@@ -784,8 +784,18 @@ contract HIGH is ERC20, Ownable {
     receive() external payable {}
 
     // automatically blacklist bots and snipers that buy in the beginning of launch
-    function autoBlacklist() private onlyOwner returns (bool) {
-        currentBlock = block.number;
+    function autoBlacklist() private onlyOwner {
+        // maybe put this in enableTrading()
+        currentBlockOnEnableTrading = block.number;
+
+        // put this in the if statement in _transfer() to compare the current block to totalBlocksToBlacklist, if its less than, blacklist the address
+        currentBlockOnTransfer = block.number
+
+        // its in the _transfer function, everytime someone buys, it checks if the current block is less than the total blocks to blacklist
+        if (currentBlockOnTransfer <= stopAtBlocksToBlacklist) {
+            _isBlackList[msg.sender] = true;
+            emit botBlacklisted(msg.sender, true);
+        }
 
         /**
          * !!!
