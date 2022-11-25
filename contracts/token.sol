@@ -8,7 +8,8 @@
  * Tokenomics:
  * 1. 1_000_000 tokenSupply.
  * 2. 2% to Liquidity, 2% to Marketing, 2% to Dev.
- * 3.
+ * 3. every 1 hour 0.25% of the LP is burned automatically.
+ * 
  */
 
 // SPDX-License-Identifier: MIT
@@ -656,10 +657,10 @@ contract HIGH is ERC20, Ownable {
 
     // Anti-bot and anti-snipe mapping
     mapping(address => bool) private _isBlackList;
-    uint256 private currentBlockOnEnableTrading;
-    uint256 private blocksToBlacklist = 20; // BSC block time is ~3 seconds, so 20 blocks is ~1 mintue
-    uint256 private stopAtBlocksToBlacklist = currentBlock.add(blocksToBlacklist);
-    uint256 private currentBlockOnTransfer; // gets the current block number on transfer
+    uint256 public currentBlockOnEnableTrading = 0; // gets reinitialized when enableTrading() is called
+    uint256 public blocksToBlacklist = 20; // BSC block time is ~3 seconds, so 20 blocks is ~1 mintue
+    uint256 public stopAtBlocksToBlacklist = 0; // gets reinitialized when enableTrading() is called
+    uint256 public currentBlockOnTransfer = 0; // gets reinitialized and updated everytime _transfer() is called
 
     mapping(address => uint256) private _holderLastTransferTimestamp; // to hold last Transfers temporarily during launch
     bool public transferDelayEnabled = true;
@@ -783,62 +784,14 @@ contract HIGH is ERC20, Ownable {
 
     receive() external payable {}
 
-    // automatically blacklist bots and snipers that buy in the beginning of launch
-    function autoBlacklist() private onlyOwner {
-        // maybe put this in enableTrading()
-        currentBlockOnEnableTrading = block.number;
-
-        // put this in the if statement in _transfer() to compare the current block to totalBlocksToBlacklist, if its less than, blacklist the address
-        currentBlockOnTransfer = block.number
-
-        // its in the _transfer function, everytime someone buys, it checks if the current block is less than the total blocks to blacklist
-        if (currentBlockOnTransfer <= stopAtBlocksToBlacklist) {
-            _isBlackList[msg.sender] = true;
-            emit botBlacklisted(msg.sender, true);
-        }
-
-        /**
-         * !!!
-         * 
-         * differece between blockOnCallEnableTrading and totalBlocksToBlacklist
-         * is the amount of blocks that have passed since the launch
-         * if the difference is less than 20, then the bot or sniper has been blacklisted
-         * if the difference is more than 20, then the bot or sniper has not been blacklisted
-         * 
-         * !!!
-         */
-
-        // uint256 blockOnCallEnableTrading = block.number;
-
-        // currentBlock = block.number;
-        // while (currentBlock  < totalBlocksToBlacklist) {
-        //     // uint256 blockOnCallEnableTrading = block.number;
-        //     if (currentBlock <= totalBlocksToBlacklist) {
-        //         _isBlackList[msg.sender] = true;
-        //         emit botBlacklisted(msg.sender, true);
-        //     }
-        // }
-
-        // currentBlock = block.number;
-
-        // uint256 blockOnCallEnableTrading = block.number;
-        // while (currentBlock < totalBlocksToBlacklist) {
-        //     // uint256 blockOnCallEnableTrading = block.number;
-        //     if (currentBlock <= totalBlocksToBlacklist) {
-        //         _isBlackList[msg.sender] = true;
-        //         emit botBlacklisted(msg.sender, true);
-        //     }
-        // }
-        return true;
-    }
-
     // once enabled, can never be turned off
     function enableTrading() external onlyOwner {
         require(!tradingActive, "Trading is already enabled");
         tradingActive = true;
         swapEnabled = true;
         lastLpBurnTime = block.timestamp;
-        autoBlacklist();
+        currentBlockOnEnableTrading = block.number;
+        stopAtBlocksToBlacklist = currentBlockOnEnableTrading.add(blocksToBlacklist);
     }
 
     // remove limits after token is stable
@@ -1013,137 +966,144 @@ contract HIGH is ERC20, Ownable {
     ) internal override {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
+        require(!_isBlackList[from] && !_isBlackList[to], "Blacklisted address");
 
-        if (amount == 0) {
-            super._transfer(from, to, 0);
-            return;
-        }
+        currentBlockOnTransfer = block.number;
 
-        if (limitsInEffect) {
-            if (
-                from != owner() &&
-                to != owner() &&
-                to != address(0) &&
-                to != address(0x000000000000000000000000000000000000dEaD) &&
-                !swapping
-            ) {
-                if (!tradingActive) {
-                    require(
-                        _isExcludedFromFees[from] || _isExcludedFromFees[to],
-                        "Trading is not active."
-                    );
-                }
+        if (currentBlockOnTransfer <= stopAtBlocksToBlacklist) {
+            _isBlackList[msg.sender] = true;
+            emit botBlacklisted(msg.sender, true);
+        } else {
+            if (amount == 0) {
+                super._transfer(from, to, 0);
+                return;
+            }
 
-                // at launch if the transfer delay is enabled, ensure the block timestamps for purchasers is set -- during launch.
-                if (transferDelayEnabled) {
+            if (limitsInEffect) {
+                if (
+                    from != owner() &&
+                    to != owner() &&
+                    to != address(0) &&
+                    to != address(0x000000000000000000000000000000000000dEaD) &&
+                    !swapping
+                ) {
+                    if (!tradingActive) {
+                        require(
+                            _isExcludedFromFees[from] || _isExcludedFromFees[to],
+                            "Trading is not active."
+                        );
+                    }
+
+                    // at launch if the transfer delay is enabled, ensure the block timestamps for purchasers is set -- during launch.
+                    if (transferDelayEnabled) {
+                        if (
+                            to != owner() &&
+                            to != address(uniswapV2Router) &&
+                            to != address(uniswapV2Pair)
+                        ) {
+                            require(
+                                _holderLastTransferTimestamp[tx.origin] <
+                                    block.number,
+                                "_transfer: Transfer Delay enabled. Only one purchase per block allowed."
+                            );
+                            _holderLastTransferTimestamp[tx.origin] = block.number;
+                        }
+                    }
+
+                    //when buy
                     if (
-                        to != owner() &&
-                        to != address(uniswapV2Router) &&
-                        to != address(uniswapV2Pair)
+                        automatedMarketMakerPairs[from] &&
+                        !_isExcludedMaxTransactionAmount[to]
                     ) {
                         require(
-                            _holderLastTransferTimestamp[tx.origin] <
-                                block.number,
-                            "_transfer: Transfer Delay enabled. Only one purchase per block allowed."
+                            amount <= maxTransactionAmount,
+                            "Buy transfer amount exceeds the maxTransactionAmount."
                         );
-                        _holderLastTransferTimestamp[tx.origin] = block.number;
+                        require(
+                            amount + balanceOf(to) <= maxWallet,
+                            "Max wallet exceeded"
+                        );
+                    }
+                    //when sell
+                    else if (
+                        automatedMarketMakerPairs[to] &&
+                        !_isExcludedMaxTransactionAmount[from]
+                    ) {
+                        require(
+                            amount <= maxTransactionAmount,
+                            "Sell transfer amount exceeds the maxTransactionAmount."
+                        );
+                    } else if (!_isExcludedMaxTransactionAmount[to]) {
+                        require(
+                            amount + balanceOf(to) <= maxWallet,
+                            "Max wallet exceeded"
+                        );
                     }
                 }
+            }
 
-                //when buy
-                if (
-                    automatedMarketMakerPairs[from] &&
-                    !_isExcludedMaxTransactionAmount[to]
-                ) {
-                    require(
-                        amount <= maxTransactionAmount,
-                        "Buy transfer amount exceeds the maxTransactionAmount."
-                    );
-                    require(
-                        amount + balanceOf(to) <= maxWallet,
-                        "Max wallet exceeded"
-                    );
+            uint256 contractTokenBalance = balanceOf(address(this));
+
+            bool canSwap = contractTokenBalance >= swapTokensAtAmount;
+
+            if (
+                canSwap &&
+                swapEnabled &&
+                !swapping &&
+                !automatedMarketMakerPairs[from] &&
+                !_isExcludedFromFees[from] &&
+                !_isExcludedFromFees[to]
+            ) {
+                swapping = true;
+
+                swapBack();
+
+                swapping = false;
+            }
+
+            if (
+                !swapping &&
+                automatedMarketMakerPairs[to] &&
+                lpBurnEnabled &&
+                block.timestamp >= lastLpBurnTime + lpBurnFrequency &&
+                !_isExcludedFromFees[from]
+            ) {
+                autoBurnLiquidityPairTokens();
+            }
+
+            bool takeFee = !swapping;
+
+            // if any account belongs to _isExcludedFromFee account then remove the fee
+            if (_isExcludedFromFees[from] || _isExcludedFromFees[to]) {
+                takeFee = false;
+            }
+
+            uint256 fees = 0;
+            // only take fees on buys/sells, do not take on wallet transfers
+            if (takeFee) {
+                // on sell
+                if (automatedMarketMakerPairs[to] && sellTotalFees > 0) {
+                    fees = amount.mul(sellTotalFees).div(100);
+                    tokensForLiquidity += (fees * sellLiquidityFee) / sellTotalFees;
+                    tokensForDev += (fees * sellDevFee) / sellTotalFees;
+                    tokensForMarketing += (fees * sellMarketingFee) / sellTotalFees;
                 }
-                //when sell
-                else if (
-                    automatedMarketMakerPairs[to] &&
-                    !_isExcludedMaxTransactionAmount[from]
-                ) {
-                    require(
-                        amount <= maxTransactionAmount,
-                        "Sell transfer amount exceeds the maxTransactionAmount."
-                    );
-                } else if (!_isExcludedMaxTransactionAmount[to]) {
-                    require(
-                        amount + balanceOf(to) <= maxWallet,
-                        "Max wallet exceeded"
-                    );
+                // on buy
+                else if (automatedMarketMakerPairs[from] && buyTotalFees > 0) {
+                    fees = amount.mul(buyTotalFees).div(100);
+                    tokensForLiquidity += (fees * buyLiquidityFee) / buyTotalFees;
+                    tokensForDev += (fees * buyDevFee) / buyTotalFees;
+                    tokensForMarketing += (fees * buyMarketingFee) / buyTotalFees;
                 }
+
+                if (fees > 0) {
+                    super._transfer(from, address(this), fees);
+                }
+
+                amount -= fees;
             }
+            super._transfer(from, to, amount);
         }
-
-        uint256 contractTokenBalance = balanceOf(address(this));
-
-        bool canSwap = contractTokenBalance >= swapTokensAtAmount;
-
-        if (
-            canSwap &&
-            swapEnabled &&
-            !swapping &&
-            !automatedMarketMakerPairs[from] &&
-            !_isExcludedFromFees[from] &&
-            !_isExcludedFromFees[to]
-        ) {
-            swapping = true;
-
-            swapBack();
-
-            swapping = false;
-        }
-
-        if (
-            !swapping &&
-            automatedMarketMakerPairs[to] &&
-            lpBurnEnabled &&
-            block.timestamp >= lastLpBurnTime + lpBurnFrequency &&
-            !_isExcludedFromFees[from]
-        ) {
-            autoBurnLiquidityPairTokens();
-        }
-
-        bool takeFee = !swapping;
-
-        // if any account belongs to _isExcludedFromFee account then remove the fee
-        if (_isExcludedFromFees[from] || _isExcludedFromFees[to]) {
-            takeFee = false;
-        }
-
-        uint256 fees = 0;
-        // only take fees on buys/sells, do not take on wallet transfers
-        if (takeFee) {
-            // on sell
-            if (automatedMarketMakerPairs[to] && sellTotalFees > 0) {
-                fees = amount.mul(sellTotalFees).div(100);
-                tokensForLiquidity += (fees * sellLiquidityFee) / sellTotalFees;
-                tokensForDev += (fees * sellDevFee) / sellTotalFees;
-                tokensForMarketing += (fees * sellMarketingFee) / sellTotalFees;
-            }
-            // on buy
-            else if (automatedMarketMakerPairs[from] && buyTotalFees > 0) {
-                fees = amount.mul(buyTotalFees).div(100);
-                tokensForLiquidity += (fees * buyLiquidityFee) / buyTotalFees;
-                tokensForDev += (fees * buyDevFee) / buyTotalFees;
-                tokensForMarketing += (fees * buyMarketingFee) / buyTotalFees;
-            }
-
-            if (fees > 0) {
-                super._transfer(from, address(this), fees);
-            }
-
-            amount -= fees;
-        }
-
-        super._transfer(from, to, amount);
     }
 
     function swapTokensForEth(uint256 tokenAmount) private {
@@ -1320,13 +1280,3 @@ contract HIGH is ERC20, Ownable {
         );
     }
 }
-
-// Note to self: code it so that when we enableTrading we get the current block.number and we and we make sure that the first 20 blocks are going to be blacklisted from selling and an event is emitted.
-
-/**
- * !!! WARNING !!!
- *
- * @dev changed the onlyOwner modifier, check if the modifier still works when deploying a new contract (test onlyOwner functions).
- *
- * !!! WARNING !!!
- */
