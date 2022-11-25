@@ -8,12 +8,12 @@ module.exports = {
     solidity: "0.8.17",
     networks: {
         hardhat: {
-            // forking: {
-            //     url: process.env.BNB_RPC_URL,
-            // },
             forking: {
-                url: process.env.ETH_RPC_URL,
+                url: process.env.BNB_RPC_URL,
             },
+            // forking: {
+            //     url: process.env.ETH_RPC_URL,
+            // },
         },
         goerli: {
             url: process.env.GOE_RPC_URL,
