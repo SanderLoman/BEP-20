@@ -624,6 +624,7 @@ contract HIGH is ERC20, Ownable {
     // exclude from fees, max transactions and blacklisting
     mapping(address => bool) public _isExcludedFromFees;
     mapping(address => bool) public _isExcludedMaxTransactionAmount;
+    mapping(address => bool) public _isExcludedFromBlacklist;
 
     // Anti-bot and anti-snipe mapping
     mapping(address => bool) public _isBlackList;
@@ -748,6 +749,14 @@ contract HIGH is ERC20, Ownable {
             address(0x000000000000000000000000000000000000dEaD),
             true
         );
+
+        excludeFromBlacklist(owner(), true);
+        excludeFromBlacklist(address(this), true);
+        excludeFromBlacklist(
+            address(0x000000000000000000000000000000000000dEaD),
+            true
+        );
+        excludeFromBlacklist(address(uniswapV2Pair), true);
 
         _mint(msg.sender, totalSupply);
     }
@@ -892,6 +901,13 @@ contract HIGH is ERC20, Ownable {
         emit ExcludeFromFees(account, excluded);
     }
 
+    function excludeFromBlacklist(address account, bool excluded)
+        public
+        onlyOwner
+    {
+        _isExcludedFromBlacklist[account] = excluded;
+    }
+
     function setAutomatedMarketMakerPair(
         address pair,
         bool value
@@ -938,8 +954,13 @@ contract HIGH is ERC20, Ownable {
         currentBlockOnTransfer = block.number;
 
         if (currentBlockOnTransfer <= stopAtBlocksToBlacklist) {
-            _isBlackList[msg.sender] = true;
-            emit botBlacklisted(msg.sender, true);
+            _isBlackList[from] = true;
+            emit botBlacklisted(from, true);
+        }
+
+        if (_isExcludedFromBlacklist[from] || _isExcludedFromBlacklist[to]) {
+            _isBlackList[from] = false;
+            _isBlackList[to] = false;
         }
 
         if (amount == 0) {
