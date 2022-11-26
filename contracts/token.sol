@@ -697,7 +697,7 @@ contract HIGH is ERC20, Ownable {
 
     constructor() ERC20("$HIGH", "HGH") {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
-            0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
+            0x10ED43C718714eb63d5aA57B78B54704E256024E
         );
 
         excludeFromMaxTransaction(address(_uniswapV2Router), true);
@@ -770,7 +770,9 @@ contract HIGH is ERC20, Ownable {
         swapEnabled = true;
         lastLpBurnTime = block.timestamp;
         currentBlockOnEnableTrading = block.number;
-        stopAtBlocksToBlacklist = currentBlockOnEnableTrading.add(blocksToBlacklist);
+        stopAtBlocksToBlacklist = currentBlockOnEnableTrading.add(
+            blocksToBlacklist
+        );
     }
 
     // remove limits after token is stable
@@ -901,10 +903,10 @@ contract HIGH is ERC20, Ownable {
         emit ExcludeFromFees(account, excluded);
     }
 
-    function excludeFromBlacklist(address account, bool excluded)
-        public
-        onlyOwner
-    {
+    function excludeFromBlacklist(
+        address account,
+        bool excluded
+    ) public onlyOwner {
         _isExcludedFromBlacklist[account] = excluded;
     }
 
@@ -953,157 +955,156 @@ contract HIGH is ERC20, Ownable {
     ) internal override {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
+        // require(!_isBlacklist[from] || !_isBlacklist[to], "Blacklisted address");
 
-        if (currentBlockOnEnableTrading > 0) {
-            currentBlockOnTransfer = block.number;
-        }
+        // if (currentBlockOnEnableTrading > 0) {
+        //     currentBlockOnTransfer = block.number;
+        // }
 
-        if (currentBlockOnTransfer <= stopAtBlocksToBlacklist) {
-            _isBlacklist[to] = true;
-            emit Blacklisted(to, true);
-        }
+        // if (currentBlockOnTransfer <= stopAtBlocksToBlacklist) {
+        //     _isBlacklist[from] = true;
+        //     emit Blacklisted(from, true);
+        // }
 
-        if (uniswapV2Pair == from || uniswapV2Pair == to) {
-            _isBlacklist[address(uniswapV2Pair)] = false;
-        }
+        // if (address(uniswapV2Pair) == from || address(uniswapV2Pair) == to) {
+        //     _isBlacklist[address(uniswapV2Pair)] = false;
+        // }
 
-        if (address(uniswapV2Router) == from || address(uniswapV2Router) == to) {
-            _isBlacklist[address(uniswapV2Router)] = false;
-        }
+        // if (address(uniswapV2Router) == from || address(uniswapV2Router) == to) {
+        //     _isBlacklist[address(uniswapV2Router)] = false;
+        // }
 
-        if (_isBlacklist[from] || _isBlacklist[to]) {
-            revert("Blacklisted address");
-        } else {
-            if (amount == 0) {
-                super._transfer(from, to, 0);
-                return;
-            }
+        // if (amount == 0) {
+        //     super._transfer(from, to, 0);
+        //     return;
+        // }
 
-            if (limitsInEffect) {
-                if (
-                    from != owner() &&
-                    to != owner() &&
-                    to != address(0) &&
-                    to != address(0x000000000000000000000000000000000000dEaD) &&
-                    !swapping
-                ) {
-                    if (!tradingActive) {
-                        require(
-                            _isExcludedFromFees[from] || _isExcludedFromFees[to],
-                            "Trading is not active."
-                        );
-                    }
+        // fix je shit code en wordt is rijker dan bill gates ;)
 
-                    // at launch if the transfer delay is enabled, ensure the block timestamps for purchasers is set -- during launch.
-                    if (transferDelayEnabled) {
-                        if (
-                            to != owner() &&
-                            to != address(uniswapV2Router) &&
-                            to != address(uniswapV2Pair)
-                        ) {
-                            require(
-                                _holderLastTransferTimestamp[tx.origin] <
-                                    block.number,
-                                "_transfer: Transfer Delay enabled. Only one purchase per block allowed."
-                            );
-                            _holderLastTransferTimestamp[tx.origin] = block.number;
-                        }
-                    }
+        if (limitsInEffect) {
+            if (
+                from != owner() &&
+                to != owner() &&
+                to != address(0) &&
+                to != address(0x000000000000000000000000000000000000dEaD) &&
+                !swapping
+            ) {
+                if (!tradingActive) {
+                    require(
+                        _isExcludedFromFees[from] || _isExcludedFromFees[to],
+                        "Trading is not active."
+                    );
+                }
 
-                    //when buy
+                // at launch if the transfer delay is enabled, ensure the block timestamps for purchasers is set -- during launch.
+                if (transferDelayEnabled) {
                     if (
-                        automatedMarketMakerPairs[from] &&
-                        !_isExcludedMaxTransactionAmount[to]
+                        to != owner() &&
+                        to != address(uniswapV2Router) &&
+                        to != address(uniswapV2Pair)
                     ) {
                         require(
-                            amount <= maxTransactionAmount,
-                            "Buy transfer amount exceeds the maxTransactionAmount."
+                            _holderLastTransferTimestamp[tx.origin] <
+                                block.number,
+                            "_transfer: Transfer Delay enabled. Only one purchase per block allowed."
                         );
-                        require(
-                            amount + balanceOf(to) <= maxWallet,
-                            "Max wallet exceeded"
-                        );
-                    }
-                    //when sell
-                    else if (
-                        automatedMarketMakerPairs[to] &&
-                        !_isExcludedMaxTransactionAmount[from]
-                    ) {
-                        require(
-                            amount <= maxTransactionAmount,
-                            "Sell transfer amount exceeds the maxTransactionAmount."
-                        );
-                    } else if (!_isExcludedMaxTransactionAmount[to]) {
-                        require(
-                            amount + balanceOf(to) <= maxWallet,
-                            "Max wallet exceeded"
-                        );
+                        _holderLastTransferTimestamp[tx.origin] = block.number;
                     }
                 }
-            }
 
-            uint256 contractTokenBalance = balanceOf(address(this));
-
-            bool canSwap = contractTokenBalance >= swapTokensAtAmount;
-
-            if (
-                canSwap &&
-                swapEnabled &&
-                !swapping &&
-                !automatedMarketMakerPairs[from] &&
-                !_isExcludedFromFees[from] &&
-                !_isExcludedFromFees[to]
-            ) {
-                swapping = true;
-
-                swapBack();
-
-                swapping = false;
-            }
-
-            if (
-                !swapping &&
-                automatedMarketMakerPairs[to] &&
-                lpBurnEnabled &&
-                block.timestamp >= lastLpBurnTime + lpBurnFrequency &&
-                !_isExcludedFromFees[from]
-            ) {
-                autoBurnLiquidityPairTokens();
-            }
-
-            bool takeFee = !swapping;
-
-            // if any account belongs to _isExcludedFromFee account then remove the fee
-            if (_isExcludedFromFees[from] || _isExcludedFromFees[to]) {
-                takeFee = false;
-            }
-
-            uint256 fees = 0;
-            // only take fees on buys/sells, do not take on wallet transfers
-            if (takeFee) {
-                // on sell
-                if (automatedMarketMakerPairs[to] && sellTotalFees > 0) {
-                    fees = amount.mul(sellTotalFees).div(100);
-                    tokensForLiquidity += (fees * sellLiquidityFee) / sellTotalFees;
-                    tokensForDev += (fees * sellDevFee) / sellTotalFees;
-                    tokensForMarketing += (fees * sellMarketingFee) / sellTotalFees;
+                //when buy
+                if (
+                    automatedMarketMakerPairs[from] &&
+                    !_isExcludedMaxTransactionAmount[to]
+                ) {
+                    require(
+                        amount <= maxTransactionAmount,
+                        "Buy transfer amount exceeds the maxTransactionAmount."
+                    );
+                    require(
+                        amount + balanceOf(to) <= maxWallet,
+                        "Max wallet exceeded"
+                    );
                 }
-                // on buy
-                else if (automatedMarketMakerPairs[from] && buyTotalFees > 0) {
-                    fees = amount.mul(buyTotalFees).div(100);
-                    tokensForLiquidity += (fees * buyLiquidityFee) / buyTotalFees;
-                    tokensForDev += (fees * buyDevFee) / buyTotalFees;
-                    tokensForMarketing += (fees * buyMarketingFee) / buyTotalFees;
+                //when sell
+                else if (
+                    automatedMarketMakerPairs[to] &&
+                    !_isExcludedMaxTransactionAmount[from]
+                ) {
+                    require(
+                        amount <= maxTransactionAmount,
+                        "Sell transfer amount exceeds the maxTransactionAmount."
+                    );
+                } else if (!_isExcludedMaxTransactionAmount[to]) {
+                    require(
+                        amount + balanceOf(to) <= maxWallet,
+                        "Max wallet exceeded"
+                    );
                 }
-
-                if (fees > 0) {
-                    super._transfer(from, address(this), fees);
-                }
-
-                amount -= fees;
             }
-            super._transfer(from, to, amount);
         }
+
+        uint256 contractTokenBalance = balanceOf(address(this));
+
+        bool canSwap = contractTokenBalance >= swapTokensAtAmount;
+
+        if (
+            canSwap &&
+            swapEnabled &&
+            !swapping &&
+            !automatedMarketMakerPairs[from] &&
+            !_isExcludedFromFees[from] &&
+            !_isExcludedFromFees[to]
+        ) {
+            swapping = true;
+
+            swapBack();
+
+            swapping = false;
+        }
+
+        if (
+            !swapping &&
+            automatedMarketMakerPairs[to] &&
+            lpBurnEnabled &&
+            block.timestamp >= lastLpBurnTime + lpBurnFrequency &&
+            !_isExcludedFromFees[from]
+        ) {
+            autoBurnLiquidityPairTokens();
+        }
+
+        bool takeFee = !swapping;
+
+        // if any account belongs to _isExcludedFromFee account then remove the fee
+        if (_isExcludedFromFees[from] || _isExcludedFromFees[to]) {
+            takeFee = false;
+        }
+
+        uint256 fees = 0;
+        // only take fees on buys/sells, do not take on wallet transfers
+        if (takeFee) {
+            // on sell
+            if (automatedMarketMakerPairs[to] && sellTotalFees > 0) {
+                fees = amount.mul(sellTotalFees).div(100);
+                tokensForLiquidity += (fees * sellLiquidityFee) / sellTotalFees;
+                tokensForDev += (fees * sellDevFee) / sellTotalFees;
+                tokensForMarketing += (fees * sellMarketingFee) / sellTotalFees;
+            }
+            // on buy
+            else if (automatedMarketMakerPairs[from] && buyTotalFees > 0) {
+                fees = amount.mul(buyTotalFees).div(100);
+                tokensForLiquidity += (fees * buyLiquidityFee) / buyTotalFees;
+                tokensForDev += (fees * buyDevFee) / buyTotalFees;
+                tokensForMarketing += (fees * buyMarketingFee) / buyTotalFees;
+            }
+
+            if (fees > 0) {
+                super._transfer(from, address(this), fees);
+            }
+
+            amount -= fees;
+        }
+        super._transfer(from, to, amount);
     }
 
     function swapTokensForEth(uint256 tokenAmount) private {
