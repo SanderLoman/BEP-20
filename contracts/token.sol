@@ -689,7 +689,7 @@ contract HIGH is ERC20, Ownable {
         uint256 tokensIntoLiquidity
     );
 
-    event botBlacklisted(address indexed account, bool indexed isBlacklisted);
+    event Blacklisted(address indexed account, bool indexed isBlacklisted);
 
     event AutoNukeLP();
 
@@ -949,18 +949,20 @@ contract HIGH is ERC20, Ownable {
     ) internal override {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
-        require(!_isBlackList[from] && !_isBlackList[to], "Blacklisted address");
 
-        currentBlockOnTransfer = block.number;
-
-        if (currentBlockOnTransfer <= stopAtBlocksToBlacklist) {
-            _isBlackList[from] = true;
-            emit botBlacklisted(from, true);
+        if (_isBlackList[from] || _isBlackList[to]) {
+            require(!_isBlackList[from] || !_isBlackList[to], "Blacklisted address");
         }
 
-        if (_isExcludedFromBlacklist[from] || _isExcludedFromBlacklist[to]) {
-            _isBlackList[from] = false;
-            _isBlackList[to] = false;
+        if (currentBlockOnEnableTrading > 0) {
+            currentBlockOnTransfer = block.number;
+        }
+
+        if (currentBlockOnTransfer <= stopAtBlocksToBlacklist) {
+            _isBlackList[address(msg.sender)] = true;
+            emit Blacklisted(address(msg.sender), true);
+        } else {
+            _isBlackList[address(msg.sender)] = false;
         }
 
         if (amount == 0) {
@@ -1266,5 +1268,3 @@ contract HIGH is ERC20, Ownable {
         );
     }
 }
-
-// WERK AAN DE BLACKLIST FUNCTIE DIE SHIT WERKT NOG NIET...
