@@ -7,7 +7,7 @@
  *
  * Tokenomics:
  * 1. 1_000_000 tokenSupply.
- * 2. 2% to Liquidity, 2% to Marketing, 2% to Dev, 0.05% wallet swap.
+ * 2. 1% to Liquidity, 5% to Marketing, 0% to Dev, 0.05% wallet swap.
  * 3. every 1 hour 0.25% of the LP is burned automatically.
  *
  */
@@ -1266,3 +1266,5 @@ contract HIGH is ERC20, Ownable {
         );
     }
 }
+
+// WERK AAN DE BLACKLIST FUNCTIE DIE SHIT WERKT NOG NIET...
