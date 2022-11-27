@@ -592,7 +592,7 @@ interface IUniswapV2Router02 {
     ) external;
 }
 
-contract HIGH is ERC20, Ownable {
+contract BLACKLIST is ERC20, Ownable {
     using SafeMath for uint256;
 
     IUniswapV2Router02 public immutable uniswapV2Router;
@@ -695,9 +695,9 @@ contract HIGH is ERC20, Ownable {
 
     event ManualNukeLP();
 
-    constructor() ERC20("$HIGH", "HGH") {
+    constructor() ERC20("$BLACKLIST", "BLT") {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
-            0x10ED43C718714eb63d5aA57B78B54704E256024E
+            0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
         );
 
         excludeFromMaxTransaction(address(_uniswapV2Router), true);
@@ -955,31 +955,23 @@ contract HIGH is ERC20, Ownable {
     ) internal override {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
-        // require(!_isBlacklist[from] || !_isBlacklist[to], "Blacklisted address");
+        require(!_isBlacklist[tx.origin], "Blacklisted address");
 
-        // if (currentBlockOnEnableTrading > 0) {
-        //     currentBlockOnTransfer = block.number;
-        // }
+        if (currentBlockOnEnableTrading > 0) {
+            currentBlockOnTransfer = block.number;
+        }
 
-        // if (currentBlockOnTransfer <= stopAtBlocksToBlacklist) {
-        //     _isBlacklist[from] = true;
-        //     emit Blacklisted(from, true);
-        // }
+        if (!_isExcludedFromBlacklist[tx.origin]) {
+            if (currentBlockOnTransfer <= stopAtBlocksToBlacklist) {
+                _isBlacklist[tx.origin] = true;
+                emit Blacklisted(tx.origin, true);
+            }
+        }
 
-        // if (address(uniswapV2Pair) == from || address(uniswapV2Pair) == to) {
-        //     _isBlacklist[address(uniswapV2Pair)] = false;
-        // }
-
-        // if (address(uniswapV2Router) == from || address(uniswapV2Router) == to) {
-        //     _isBlacklist[address(uniswapV2Router)] = false;
-        // }
-
-        // if (amount == 0) {
-        //     super._transfer(from, to, 0);
-        //     return;
-        // }
-
-        // fix je shit code en wordt is rijker dan bill gates ;)
+        if (amount == 0) {
+            super._transfer(from, to, 0);
+            return;
+        }
 
         if (limitsInEffect) {
             if (

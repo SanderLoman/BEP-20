@@ -8,7 +8,7 @@ const main = async () => {
 
     console.log("Account balance:", ((before = await deployer.getBalance()) / 1e18).toFixed(4), "ETH")
 
-    const Contract = await hre.ethers.getContractFactory("HIGH")
+    const Contract = await hre.ethers.getContractFactory("BLACKLIST")
     const contract = await Contract.deploy()
 
     await contract.deployed()
