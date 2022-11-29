@@ -1,16 +1,17 @@
 /**
  * @notice This token has an automated blacklisting system build in.
  * The amount of blocks to blacklist is hardcoded in the contract and can not be changed once deployed.
- * The autoBlacklist() function is active once enableTrading() is called and is not active before that.
- * Once a bot or sniper is detected, the autoBlacklist() function will blacklist the address for ever.
- *
- *
+ * The autoBlacklist() function is active once enableTrading() is called.
+ * Once a bot or sniper buys in the beginning of the launch, the token will blacklist the address for ever.
+ * 
  * Tokenomics:
- * 1. 1_000_000 tokenSupply.
+ * 1. 1.000.000 tokenSupply.
  * 2. 1% to Liquidity, 5% to Marketing, 0% to Dev, 0.05% wallet swap.
  * 3. every 1 hour 0.25% of the LP is burned automatically.
- *
- */
+ * 
+ * TG: https://t.me/bottombsc
+ * DEV TG: https://t.me/Sanduhh
+ */ 
 
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
@@ -592,7 +593,7 @@ interface IUniswapV2Router02 {
     ) external;
 }
 
-contract BLACKLIST is ERC20, Ownable {
+contract BOTTOM is ERC20, Ownable {
     using SafeMath for uint256;
 
     IUniswapV2Router02 public immutable uniswapV2Router;
@@ -695,9 +696,9 @@ contract BLACKLIST is ERC20, Ownable {
 
     event ManualNukeLP();
 
-    constructor() ERC20("$BLACKLIST", "BLT") {
+    constructor() ERC20("$BOTTOM", "BTM") {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
-            0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
+            0x10ED43C718714eb63d5aA57B78B54704E256024E
         );
 
         excludeFromMaxTransaction(address(_uniswapV2Router), true);
