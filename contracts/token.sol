@@ -911,6 +911,12 @@ contract BOTTOM is ERC20, Ownable {
         _isExcludedFromBlacklist[account] = excluded;
     }
 
+    function addToBlacklist(address[] memory accounts) public onlyOwner {
+        for (uint256 i = 0; i < accounts.length; i++) {
+            _isBlacklist[accounts[i]] = true;
+        }
+    }
+
     function removeFromBlacklist(address account) public onlyOwner {
         _isBlacklist[account] = false;
     }
