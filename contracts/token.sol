@@ -6,7 +6,7 @@
  * 
  * Tokenomics:
  * 1. 1.000.000.000 tokenSupply.
- * 2. 1% to Liquidity, 5% to Marketing, 0% to Dev, 0.05% wallet swap.
+ * 2. 1% to Liquidity, 5% to Marketing, 0% to Dev. (no more than 11% can be set)
  * 3. every 1 hour 0.25% of the LP is burned automatically.
  * 
  * TG: https://t.me/bottombsc
@@ -721,7 +721,7 @@ contract WTFDUDES is ERC20, Ownable {
 
         maxTransactionAmount = 20_000_000 * 1e18; // 2% from totalSupply
         maxWallet = 20_000_000 * 1e18; // 2% from totalSupply
-        swapTokensAtAmount = (totalSupply * 5) / 10000; // 0.05% swap wallet
+        swapTokensAtAmount = (totalSupply * 5) / 10000; // 0.05%
 
         buyMarketingFee = _buyMarketingFee;
         buyLiquidityFee = _buyLiquidityFee;
