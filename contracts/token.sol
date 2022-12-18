@@ -1,11 +1,11 @@
 /**
  * @notice This token has an automated blacklisting system build in.
  * The amount of blocks to blacklist is hardcoded in the contract and can not be changed once deployed.
- * The autoBlacklist() function is active once enableTrading() is called.
+ * If a person calls the transfer function, the contract will check if the sender is buying in the first 
  * Once a bot or sniper buys in the beginning of the launch, the token will blacklist the address for ever.
  * 
  * Tokenomics:
- * 1. 1.000.000 tokenSupply.
+ * 1. 1.000.000.000 tokenSupply.
  * 2. 1% to Liquidity, 5% to Marketing, 0% to Dev, 0.05% wallet swap.
  * 3. every 1 hour 0.25% of the LP is burned automatically.
  * 
@@ -593,7 +593,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     ) internal virtual {}
 }
 
-contract BOTTOM is ERC20, Ownable {
+contract WTFDUDES is ERC20, Ownable {
     using SafeMath for uint256;
 
     IUniswapV2Router02 public immutable uniswapV2Router;
@@ -696,7 +696,7 @@ contract BOTTOM is ERC20, Ownable {
 
     event ManualNukeLP();
 
-    constructor() ERC20("$BOTTOM", "BTM") {
+    constructor() ERC20("WTFDUDES", "WTF") {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
             0x10ED43C718714eb63d5aA57B78B54704E256024E
         );
@@ -717,10 +717,10 @@ contract BOTTOM is ERC20, Ownable {
         uint256 _sellLiquidityFee = 0;
         uint256 _sellDevFee = 0;
 
-        uint256 totalSupply = 1_000_000 * 1e18;
+        uint256 totalSupply = 1_000_000_000 * 1e18;
 
-        maxTransactionAmount = 20_000 * 1e18; // 2% from totalSupply
-        maxWallet = 20_000 * 1e18; // 2% from totalSupply
+        maxTransactionAmount = 20_000_000 * 1e18; // 2% from totalSupply
+        maxWallet = 20_000_000 * 1e18; // 2% from totalSupply
         swapTokensAtAmount = (totalSupply * 5) / 10000; // 0.05% swap wallet
 
         buyMarketingFee = _buyMarketingFee;
