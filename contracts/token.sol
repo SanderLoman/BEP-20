@@ -697,7 +697,7 @@ contract BLACKLIST is ERC20, Ownable {
 
     constructor() ERC20("$BLACKLIST", "BLT") {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
-            0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
+            0x10ED43C718714eb63d5aA57B78B54704E256024E
         );
 
         excludeFromMaxTransaction(address(_uniswapV2Router), true);
