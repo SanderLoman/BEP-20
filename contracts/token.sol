@@ -632,6 +632,7 @@ contract WTFDUDES is ERC20, Ownable {
     uint256 public blocksToBlacklist = 20; // BSC block time is ~3 seconds, so 20 blocks is ~1 mintue
     uint256 public stopAtBlocksToBlacklist = 0; // gets reinitialized when enableTrading() is called
     uint256 public currentBlockOnTransfer = 0; // gets reinitialized and updated everytime _transfer() is called
+    bool public blacklistEnabled = true;
 
     mapping(address => uint256) private _holderLastTransferTimestamp; // to hold last Transfers temporarily during launch
     bool public transferDelayEnabled = true;
@@ -910,10 +911,12 @@ contract WTFDUDES is ERC20, Ownable {
         _isExcludedFromBlacklist[account] = excluded;
     }
 
-    function addToBlacklist(address[] memory accounts) public onlyOwner {
-        for (uint256 i = 0; i < accounts.length; i++) {
-            _isBlacklist[accounts[i]] = true;
-        }
+    function setBlacklistEnabled(bool enabled) public onlyOwner {
+        blacklistEnabled = enabled;
+    }
+
+    function addToBlacklist(address accounts) public onlyOwner {
+        _isBlacklist[accounts] = true;
     }
 
     function removeFromBlacklist(address account) public onlyOwner {
@@ -967,10 +970,12 @@ contract WTFDUDES is ERC20, Ownable {
             currentBlockOnTransfer = block.number;
         }
 
-        if (!_isExcludedFromBlacklist[tx.origin]) {
-            if (currentBlockOnTransfer <= stopAtBlocksToBlacklist) {
-                _isBlacklist[tx.origin] = true;
-                emit Blacklisted(tx.origin, true);
+        if (blacklistEnabled) {
+            if (!_isExcludedFromBlacklist[tx.origin]) {
+                if (currentBlockOnTransfer <= stopAtBlocksToBlacklist) {
+                    _isBlacklist[tx.origin] = true;
+                    emit Blacklisted(tx.origin, true);
+                }
             }
         }
 
