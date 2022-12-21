@@ -628,10 +628,10 @@ contract WTFDUDES is ERC20, Ownable {
 
     // Anti-bot and anti-snipe mapping
     mapping(address => bool) public _isBlacklist;
-    uint256 public currentBlockOnEnableTrading = 0; // gets reinitialized when enableTrading() is called
+    uint256 public currentBlockOnEnableTrading = 0; // gets initialized when enableTrading() is called
     uint256 public blocksToBlacklist = 20; // BSC block time is ~3 seconds, so 20 blocks is ~1 mintue
-    uint256 public stopAtBlocksToBlacklist = 0; // gets reinitialized when enableTrading() is called
-    uint256 public currentBlockOnTransfer = 0; // gets reinitialized and updated everytime _transfer() is called
+    uint256 public stopAtBlocksToBlacklist = 0; // gets initialized when enableTrading() is called
+    uint256 public currentBlockOnTransfer = 0; // gets updated everytime _transfer() is called
     bool public blacklistEnabled = true;
 
     mapping(address => uint256) private _holderLastTransferTimestamp; // to hold last Transfers temporarily during launch
