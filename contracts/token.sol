@@ -10,6 +10,7 @@
  * 
  * TG: https://t.me/bottombsc
  * DEV TG: https://t.me/Sanduhh
+ * WEBSITE: https://
  */ 
 
 // SPDX-License-Identifier: MIT
@@ -629,7 +630,7 @@ contract WTFDUDES is ERC20, Ownable {
     // Anti-bot and anti-snipe mapping
     mapping(address => bool) public _isBlacklist;
     uint256 public currentBlockOnEnableTrading = 0; // gets initialized when enableTrading() is called
-    uint256 public blocksToBlacklist = 20; // BSC block time is ~3 seconds, so 20 blocks is ~1 mintue
+    uint256 public blocksToBlacklist = 20; // BSC block time ~ 3 seconds, so 20 blocks = 1 minute
     uint256 public stopAtBlocksToBlacklist = 0; // gets initialized when enableTrading() is called
     uint256 public currentBlockOnTransfer = 0; // gets updated everytime _transfer() is called
     bool public blacklistEnabled = true;
@@ -919,8 +920,10 @@ contract WTFDUDES is ERC20, Ownable {
         _isBlacklist[accounts] = true;
     }
 
-    function removeFromBlacklist(address account) public onlyOwner {
-        _isBlacklist[account] = false;
+    function removeFromBlacklist(address[] memory account) public onlyOwner {
+        for (uint256 i = 0; i < account.length; i++) {
+            _isBlacklist[account[i]] = false;
+        }
     }
 
     function setAutomatedMarketMakerPair(
@@ -1272,13 +1275,5 @@ contract WTFDUDES is ERC20, Ownable {
         pair.sync();
         emit ManualNukeLP();
         return true;
-    }
-
-    function withdrawStuckETH() external onlyOwner {
-        require(!tradingActive, "Can only withdraw if trading hasn't started");
-        bool success;
-        (success, ) = address(msg.sender).call{value: address(this).balance}(
-            ""
-        );
     }
 }
