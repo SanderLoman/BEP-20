@@ -8,7 +8,7 @@
  * 2. 1% to Liquidity, 5% to Marketing, 0% to Dev. (no more than 11% can be set)
  * 3. every 1 hour 0.25% of the LP is burned automatically.
  * 
- * !!! 99% sell tax in the beginning !!!
+ * !!! 90% sell tax in the beginning !!!
  * 
  * TG: https://t.me/
  * DEV TG: https://t.me/Sanduhh
@@ -715,7 +715,7 @@ contract WTFDUDES is ERC20, Ownable {
         uint256 _buyLiquidityFee = 0;
         uint256 _buyDevFee = 0;
 
-        uint256 _sellMarketingFee = 99;
+        uint256 _sellMarketingFee = 90;
         uint256 _sellLiquidityFee = 0;
         uint256 _sellDevFee = 0;
 
