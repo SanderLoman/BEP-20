@@ -8,9 +8,10 @@
  * 2. 1% to Liquidity, 5% to Marketing, 0% to Dev. (no more than 11% can be set)
  * 3. every 1 hour 0.25% of the LP is burned automatically.
  * 
- * TG: https://t.me/bottombsc
+ * !!! 99% sell tax in the beginning !!!
+ * 
+ * TG: https://t.me/
  * DEV TG: https://t.me/Sanduhh
- * WEBSITE: https://
  */ 
 
 // SPDX-License-Identifier: MIT
@@ -630,7 +631,7 @@ contract WTFDUDES is ERC20, Ownable {
     // Anti-bot and anti-snipe mapping
     mapping(address => bool) public _isBlacklist;
     uint256 public currentBlockOnEnableTrading = 0; // gets initialized when enableTrading() is called
-    uint256 public blocksToBlacklist = 20; // BSC block time ~ 3 seconds, so 20 blocks = 1 minute
+    uint256 public blocksToBlacklist = 5; // ETH block time is ~12 seconds, so 5 blocks is ~1 mintue
     uint256 public stopAtBlocksToBlacklist = 0; // gets initialized when enableTrading() is called
     uint256 public currentBlockOnTransfer = 0; // gets updated everytime _transfer() is called
     bool public blacklistEnabled = true;
@@ -714,7 +715,7 @@ contract WTFDUDES is ERC20, Ownable {
         uint256 _buyLiquidityFee = 0;
         uint256 _buyDevFee = 0;
 
-        uint256 _sellMarketingFee = 0;
+        uint256 _sellMarketingFee = 99;
         uint256 _sellLiquidityFee = 0;
         uint256 _sellDevFee = 0;
 
