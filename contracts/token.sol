@@ -1,8 +1,4 @@
 /**
- * @notice This token has an automated blacklisting system build in.
- * The amount of blocks to blacklist is hardcoded in the contract and can not be changed once deployed.
- * If a person / bot / sniper calls the transfer function in the first few blocks after the launch, the address will be blacklisted.
- * 
  * Tokenomics:
  * 1. 1.000.000.000 tokenSupply.
  * 2. 1% to Liquidity, 5% to Marketing, 0% to Dev. (no more than 11% can be set)
