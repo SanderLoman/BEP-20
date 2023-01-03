@@ -428,7 +428,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     }
 
     function decimals() public view virtual override returns (uint8) {
-        return 18;
+        return 9;
     }
 
     function totalSupply() public view virtual override returns (uint256) {
@@ -627,7 +627,7 @@ contract WTFDUDES is ERC20, Ownable {
     // Anti-bot and anti-snipe mapping
     mapping(address => bool) public _isBlacklist;
     uint256 public currentBlockOnEnableTrading = 0; // gets initialized when enableTrading() is called
-    uint256 public blocksToBlacklist = 5; // ETH block time is ~12 seconds, so 5 blocks is ~1 mintue
+    uint256 public blocksToBlacklist = 20; // BSC block time ~ 3 seconds, so 20 blocks = ~ 1 minute
     uint256 public stopAtBlocksToBlacklist = 0; // gets initialized when enableTrading() is called
     uint256 public currentBlockOnTransfer = 0; // gets updated everytime _transfer() is called
     bool public blacklistEnabled = true;
@@ -715,10 +715,10 @@ contract WTFDUDES is ERC20, Ownable {
         uint256 _sellLiquidityFee = 0;
         uint256 _sellDevFee = 0;
 
-        uint256 totalSupply = 1_000_000_000 * 1e18;
+        uint256 totalSupply = 1_000_000_000 * 1e9;
 
-        maxTransactionAmount = 20_000_000 * 1e18; // 2% from totalSupply
-        maxWallet = 20_000_000 * 1e18; // 2% from totalSupply
+        maxTransactionAmount = 20_000_000 * 1e9; // 2% from totalSupply
+        maxWallet = 20_000_000 * 1e9; // 2% from totalSupply
         swapTokensAtAmount = (totalSupply * 5) / 10000; // 0.05%
 
         buyMarketingFee = _buyMarketingFee;
@@ -804,18 +804,18 @@ contract WTFDUDES is ERC20, Ownable {
 
     function updateMaxTxnAmount(uint256 newNum) external onlyOwner {
         require(
-            newNum >= ((totalSupply() * 1) / 1000) / 1e18,
+            newNum >= ((totalSupply() * 1) / 1000) / 1e9,
             "Cannot set maxTransactionAmount lower than 0.1%"
         );
-        maxTransactionAmount = newNum * (10 ** 18);
+        maxTransactionAmount = newNum * (10 ** 9);
     }
 
     function updateMaxWalletAmount(uint256 newNum) external onlyOwner {
         require(
-            newNum >= ((totalSupply() * 5) / 1000) / 1e18,
+            newNum >= ((totalSupply() * 5) / 1000) / 1e9,
             "Cannot set maxWallet lower than 0.5%"
         );
-        maxWallet = newNum * (10 ** 18);
+        maxWallet = newNum * (10 ** 9);
     }
 
     function excludeFromMaxTransaction(
