@@ -1,4 +1,8 @@
-/**
+/** 
+ * ░█  ░█ ▀▀█▀▀ ░█▀▀▀ ░█▀▀▄ ░█ ░█ ░█▀▀▄ ░█▀▀▀ ░█▀▀▀█ 
+ * ░█░█░█  ░█   ░█▀▀▀ ░█ ░█ ░█ ░█ ░█ ░█ ░█▀▀▀  ▀▀▀▄▄ 
+ * ░█▄▀▄█  ░█   ░█    ░█▄▄▀  ▀▄▄▀ ░█▄▄▀ ░█▄▄▄ ░█▄▄▄█
+ * 
  * Tokenomics:
  * 1. 1.000.000.000 tokenSupply.
  * 2. 1% to Liquidity, 5% to Marketing, 0% to Dev. (no more than 11% can be set)
@@ -8,6 +12,8 @@
  * 
  * TG: https://t.me/
  * DEV TG: https://t.me/Sanduhh
+ * website: https://
+ * 
  */ 
 
 // SPDX-License-Identifier: MIT
